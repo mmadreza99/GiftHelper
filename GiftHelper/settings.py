@@ -40,21 +40,26 @@ SECRET_KEY = os.getenv('SECRET_KEY_GIFTHELPER')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(os.getenv('DEBUG')))
 
-ALLOWED_HOSTS = ['hediyeYar.ir', 'hediyeYar.darkube.app', '127.0.0.1']
+ALLOWED_HOSTS = ['hediyeYar.ir', 'hediyeYar.darkube.app', 'hediyeYar', ]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    "admin_interface",
+    "colorfield",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts'
-    'gifts'
+    'accounts',
+    'gifts',
 ]
+
+X_FRAME_OPTIONS = "SAMEORIGIN"
+SILENCED_SYSTEM_CHECKS = ["security.W019"]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -219,7 +224,7 @@ SECRET_KEY_ARCAPTCHA = os.getenv('SECRET_KEY_ARCAPTCHA')
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.getenv('redis_url'),  # Redis server URL
+        "LOCATION": os.getenv('redis_ip'),  # Redis server URL
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
