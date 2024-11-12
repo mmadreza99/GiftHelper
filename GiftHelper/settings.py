@@ -9,9 +9,23 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
+import logging
+import logging.config
+import locale
+from dotenv import load_dotenv
+import sentry_sdk
 
+sentry_sdk.init(
+    dsn="https://25d4736ae2cf82b3a2994148fdce26cc@sentry.hamravesh.com/7551",
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    traces_sample_rate=1.0,
+)
+
+# Parse a .env file and then load all the variables found as environment variables.
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,12 +34,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-(y!msu9!o7))e$&y5)#hku4!a(4z7om_gfjpgem=@!nnxpj0yp'
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv('SECRET_KEY_GIFTHELPER')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(int(os.getenv('DEBUG')))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['hediyeYar.ir', 'hediyeYar.darkube.app', '127.0.0.1']
 
 
 # Application definition
@@ -106,7 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tehran'
 
 USE_I18N = True
 
@@ -122,3 +137,116 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+SMS_API_KEY = os.getenv('SMS_API_KEY')
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/var/lib/data/debug.log',
+            'formatter': 'verbose',
+        },
+        'system_log': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/var/lib/data/system.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        # 'django': {
+        #     'handlers': ['file'],
+        #     'level': 'DEBUG',
+        #     'propagate': True,
+        # },
+        'system_log': {
+            'handlers': ['system_log'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+
+    },
+}
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.c1.liara.email'  # or your email provider's SMTP server
+EMAIL_PORT = 465  # or 465 for SSL
+EMAIL_USE_TLS = False  # Use TLS for encryption (True) or SSL (False)
+EMAIL_USE_SSL = True  # Use SSL (True) or not (False)
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+MAIL_FROM_ADDRESS='info@mail.hediyeYar.ir'
+
+use_celery = False
+
+# AUTH_USER_MODEL = 'account.CustomUser'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, '/media/')
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+NUMBER_GROUPING = 3
+
+SITE_KEY_ARCAPTCHA = os.getenv('SITE_KEY_ARCAPTCHA')  # arcaptcha
+SECRET_KEY_ARCAPTCHA = os.getenv('SECRET_KEY_ARCAPTCHA')
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.getenv('redis_url'),  # Redis server URL
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+# Optionally set timeout, compression, etc.
+CACHE_TTL = 60 * 15  # Cache timeout in seconds
+
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [(os.getenv('redis_ip'), 6379)],
+#         },
+#     },
+# }
+
+# Celery Configuration
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')  # Redis broker URL
+CELERY_RESULT_BACKEND = os.getenv('CELERY_BROKER_URL')  # Store task results in Redis (optional)
+
+# Optional configurations
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://hediyeYar.darkube.app',
+    'https://hediyeYar.ir',
+    'https://app.hediyeYar.ir',
+]
